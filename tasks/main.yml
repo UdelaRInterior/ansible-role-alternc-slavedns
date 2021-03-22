@@ -1,0 +1,21 @@
+---
+# tasks file for ansible-role-alternc-slavedns
+
+- name: Authentication test on anacahuita API
+  uri:
+    url: "https://{{ alternc_debconf_desktopname }}/api/auth"
+    method: POST
+#    body_format: json
+    body_format: form-urlencoded
+    follow_redirects: all
+    return_content: yes
+    body:
+      login: admin
+      password: "{{ alternc_admin_pass }}"
+  register: alternc_login
+
+- name: See URI request result
+  debug:
+    var: alternc_login
+
+...

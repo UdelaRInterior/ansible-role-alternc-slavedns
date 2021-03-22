@@ -1,0 +1,7 @@
+---
+# defaults file for ansible-role-alternc-slavedns
+
+alternc_debconf_desktopname: panel.may_alternc.org
+# alternc_admin_pass: <Put it in a vault>  # No default value, better a playbook run error than an unsecure result.
+
+...
