@@ -22,10 +22,36 @@
 #   debug:
 #     var: alternc_login
 
-- name: Repositories and packages
-  include_tasks: 10_packages.yml
+- name: Add AlternC repository key
+  apt_key:
+    url: "{{ alternc_repo }}/{{ alternc_key }}"
+    state: present
 
-- name: alternc-slavedns configuration
-  include_tasks: 20_slavedns_config.yml
+- name: Add AlternC repository
+  apt_repository:
+    repo: deb {{ alternc_repo }} {{ alternc_branch }}
+    state: present
+    filename: alternc
+  register: alternc_repo_add
+
+- name: Update packages data if needed
+  apt:
+    update_cache: yes
+  when: alternc_repo_add is changed
+
+- name: Install alternc-slavedns package
+  apt:
+    name: alternc-slavedns
+    cache_valid_time: 600
+    state: present
+
+- name: Template AlternC slave DNS configuration file
+  template:
+    src: alternc-slavedns-config.j2
+    dest: '{{ alternc_slavedns_confdir }}/{{ alternc_slavedns_master }}.conf'
+    owner: root
+    group: root
+    mode: '0644'
+  when:  alternc_slavedns_master != ''
 
 ...

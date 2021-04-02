@@ -3,6 +3,26 @@
 
 ## Login and password is worth to be taken from the structure defined also for the AlternC master server
 ## This variable should be set in a group that contain de AlternC master and it slave(s)
+
+# AlternC packages repository and key
+alternc_repo: 'http://debian.koumbit.net/debian'
+alternc_branch: 'alternc35 main'
+alternc_key: 'key.asc'
+
+# Variables' default values are built from the AlternC main roles set of variables.
+# These variables shared between master and slave are worthly put in an "alternc cluster group"
+# that contains the master and the slave alternc servers.  
+
+# The web protocol to access the list of domains to be secondary DNS 
+alternc_slavedns_protocol: "{{ alternc_desktop_protocol if alternc_desktop_protocol is defined else 'http' }}"
+
+# The AlternC server (or other system) to gather the list of domains from 
+alternc_slavedns_master: "{{ alternc_debconf_desktopname if alternc_debconf_desktopname is defined else '' }}"
+
+# The IP of the BIND master server (generally the same AlternC server) to configure slave zones 
+alternc_slavedns_master_ip: "{{ lookup('dig', alternc_debconf_desktopname )}}"
+
+# The default values of the next variables use the following structure, from the main role  
 alternc_slavedns_credentials: []
 # - hostname: slavedns1.mydomain.org
 #   login: slavedns1
@@ -11,25 +31,27 @@ alternc_slavedns_credentials: []
 #   login: slavedns2
 #   password: "{{ vault_password2 }}"
 
-# AlternC packages repository and key
-alternc_repo: 'http://debian.koumbit.net/debian'
-alternc_branch: 'alternc35 main'
-alternc_key: 'key.asc'
-
-# The web protocol to access the list of domains to be secondary DNS 
-alternc_slavedns_protocol: "{{ alternc_desktop_protocol if alternc_desktop_protocol is defined else 'http' }}"
-
-# The AlternC server (or other system) to gather the list of domains from 
-alternc_slavedns_master: "{{ alternc_debconf_desktopname if alternc_debconf_desktopname is defined else '' }}"
-
-alternc_slavedns_master_ip: "{{ lookup('dig', alternc_debconf_desktopname )}}"
-
+# The login to access the web page of the list of zones in the AlternC server (or other system)
 alternc_slavedns_login_query:  '[?hostname==`{{ inventory_hostname }}`].login'
 alternc_slavedns_login_cluster: '{{ alternc_slavedns_credentials | json_query( alternc_slavedns_login_query ) }}'
 alternc_slavedns_login: "{{ '' if alternc_slavedns_login_cluster | length == 0 else alternc_slavedns_login_cluster | first }}"
 
+# The password to access the web page of the list of zones in the AlternC server (or other system)
 alternc_slavedns_password_query:  '[?hostname==`{{ inventory_hostname }}`].password'
 alternc_slavedns_password_cluster: '{{ alternc_slavedns_credentials | json_query( alternc_slavedns_password_query ) }}'
 alternc_slavedns_password: "{{ '' if alternc_slavedns_password_cluster | length == 0 else alternc_slavedns_password_cluster | first }}"
+
+# Other parameters of the alternc-slavedns script (see /usr/sbin/alternc-slavedns in the host)
+alternc_slavedns_confdir: /etc/alternc/slavedns
+alternc_slavedns_cachedir: /var/cache/slavedns
+alternc_slavedns_bind_dir: /etc/bind/slavedns
+alternc_slavedns_bind_include: /etc/bind/slavedns.conf
+alternc_slavedns_wgetrc: ${HOME}/.wgetrc
+alternc_slavedns_wget: wget
+alternc_slavedns_wget_flags: -q
+alternc_slavedns_named: "systemctl restart bind9"    # package default: "/etc/init.d/bind restart"
+alternc_slavedns_named_checkconf: /usr/sbin/named-checkconf
+alternc_slavedns_defaults_conf: defaults.conf
+alternc_slavedns_debug: 'false'
 
 ...
