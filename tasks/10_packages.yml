@@ -1,0 +1,27 @@
+---
+# Repository and packages needed for alternc-slavedns
+
+- name: Add AlternC repository key
+  apt_key:
+    url: "{{ alternc_repo }}/{{ alternc_key }}"
+    state: present
+
+- name: Add AlternC repository
+  apt_repository:
+    repo: deb {{ alternc_repo }} {{ alternc_branch }}
+    state: present
+    filename: alternc
+  register: alternc_repo_add
+
+- name: Update packages data if needed
+  apt:
+    update_cache: yes
+  when: alternc_repo_add is changed
+
+- name: Install alternc-slavedns package
+  apt:
+    name: alternc-slavedns
+    cache_valid_time: 600
+    state: present
+
+...

@@ -1,7 +1,35 @@
 ---
 # defaults file for ansible-role-alternc-slavedns
 
-alternc_debconf_desktopname: panel.may_alternc.org
-# alternc_admin_pass: <Put it in a vault>  # No default value, better a playbook run error than an unsecure result.
+## Login and password is worth to be taken from the structure defined also for the AlternC master server
+## This variable should be set in a group that contain de AlternC master and it slave(s)
+alternc_slavedns_credentials: []
+# - hostname: slavedns1.mydomain.org
+#   login: slavedns1
+#   password: "{{ vault_password1 }}"
+# - hostname: slavedns2.mydomain.org
+#   login: slavedns2
+#   password: "{{ vault_password2 }}"
+
+# AlternC packages repository and key
+alternc_repo: 'http://debian.koumbit.net/debian'
+alternc_branch: 'alternc35 main'
+alternc_key: 'key.asc'
+
+# The web protocol to access the list of domains to be secondary DNS 
+alternc_slavedns_protocol: "{{ alternc_desktop_protocol if alternc_desktop_protocol is defined else 'http' }}"
+
+# The AlternC server (or other system) to gather the list of domains from 
+alternc_slavedns_master: "{{ alternc_debconf_desktopname if alternc_debconf_desktopname is defined else '' }}"
+
+alternc_slavedns_master_ip: "{{ lookup('dig', alternc_debconf_desktopname )}}"
+
+alternc_slavedns_login_query:  '[?hostname==`{{ inventory_hostname }}`].login'
+alternc_slavedns_login_cluster: '{{ alternc_slavedns_credentials | json_query( alternc_slavedns_login_query ) }}'
+alternc_slavedns_login: "{{ '' if alternc_slavedns_login_cluster | length == 0 else alternc_slavedns_login_cluster | first }}"
+
+alternc_slavedns_password_query:  '[?hostname==`{{ inventory_hostname }}`].password'
+alternc_slavedns_password_cluster: '{{ alternc_slavedns_credentials | json_query( alternc_slavedns_password_query ) }}'
+alternc_slavedns_password: "{{ '' if alternc_slavedns_password_cluster | length == 0 else alternc_slavedns_password_cluster | first }}"
 
 ...

@@ -1,21 +1,31 @@
 ---
 # tasks file for ansible-role-alternc-slavedns
 
-- name: Authentication test on anacahuita API
-  uri:
-    url: "https://{{ alternc_debconf_desktopname }}/api/auth"
-    method: POST
-#    body_format: json
-    body_format: form-urlencoded
-    follow_redirects: all
-    return_content: yes
-    body:
-      login: admin
-      password: "{{ alternc_admin_pass }}"
-  register: alternc_login
+##  Attempt to access AlternC through the API
+##  But it's broken: 
+# - name: Authentication test on AlternC API
+#   uri:
+#     url: "https://{{ alternc_debconf_desktopname }}/api/auth"
+#     method: POST
+# #    body_format: json
+#     body_format: form-urlencoded
+#     follow_redirects: all
+#     return_content: yes
+#     body:
+#       method: login
+#       options:
+#         login: admin
+#         password: "{{ alternc_admin_pass }}"
+#   register: alternc_login
+# 
+# - name: See URI request result
+#   debug:
+#     var: alternc_login
 
-- name: See URI request result
-  debug:
-    var: alternc_login
+- name: Repositories and packages
+  include_tasks: 10_packages.yml
+
+- name: alternc-slavedns configuration
+  include_tasks: 20_slavedns_config.yml
 
 ...
