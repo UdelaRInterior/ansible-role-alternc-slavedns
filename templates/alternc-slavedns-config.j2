@@ -1,0 +1,51 @@
+# AlternC slave DNS in {{ inventory_hostname }}, master: {{ alternc_slavedns_master }}
+
+# Web protocol to access list of domains in master (http or https)  
+PROTOCOL={{ alternc_slavedns_protocol }}
+
+# DNS of the master to retrive the list of domains
+HOST={{ alternc_slavedns_master }}
+
+# IP of the master to configure slave zones
+MASTERIP={{ alternc_slavedns_master_ip }}
+
+# Login of the slave to connect to the master 
+LOGIN={{ alternc_slavedns_login }}
+
+# Login of the slave to connect to the master 
+PASSWORD={{ alternc_slavedns_password }}
+
+# Other parameters of the alternc-slavedns script (see /usr/sbin/alternc-slavedns)
+{% if alternc_slavedns_confdir != '/etc/alternc/slavedns' %}
+CONFDIR={{ alternc_slavedns_confdir }}
+{% endif %}
+{% if alternc_slavedns_cachedir != '/var/cache/slavedns' %}
+CACHEDIR={{ alternc_slavedns_cachedir }}
+{% endif %}
+{% if alternc_slavedns_bind_dir  != '/etc/bind/slavedns' %}
+BINDDIR={{ alternc_slavedns_bind_dir }}
+{% endif %}
+{% if alternc_slavedns_bind_include != '/etc/bind/slavedns.conf' %}
+BINDINCLUDE={{ alternc_slavedns_bind_include }}
+{% endif %}
+{% if alternc_slavedns_wgetrc != '${HOME}/.wgetrc' %}
+WGETRC={{ alternc_slavedns_wgetrc }}
+{% endif %}
+{% if alternc_slavedns_wget != 'wget' %}
+WGET=wget
+{% endif %}
+{% if alternc_slavedns_wget_flags != '-q' %}
+WGETFLAGS="{{ alternc_slavedns_wget_flags }}"
+{% endif %}
+{% if alternc_slavedns_named != '/etc/init.d/bind restart' %}
+NAMED="{{ alternc_slavedns_named }}"
+{% endif %}
+{% if alternc_slavedns_named_checkconf != '/usr/sbin/named-checkconf' %}
+NAMED_CHECKCONF={{ alternc_slavedns_named_checkconf }}
+{% endif %}
+{% if alternc_slavedns_defaults_conf != 'defaults.conf' %}
+DEFAULTS={{ alternc_slavedns_defaults_conf }}
+{% endif %}
+{% if alternc_slavedns_debug != 'false' %}
+DEBUG={{ alternc_slavedns_debug }}
+{% endif %}

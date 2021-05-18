@@ -1,0 +1,57 @@
+---
+# tasks file for ansible-role-alternc-slavedns
+
+##  Attempt to access AlternC through the API
+##  But it's broken: 
+# - name: Authentication test on AlternC API
+#   uri:
+#     url: "https://{{ alternc_debconf_desktopname }}/api/auth"
+#     method: POST
+# #    body_format: json
+#     body_format: form-urlencoded
+#     follow_redirects: all
+#     return_content: yes
+#     body:
+#       method: login
+#       options:
+#         login: admin
+#         password: "{{ alternc_admin_pass }}"
+#   register: alternc_login
+# 
+# - name: See URI request result
+#   debug:
+#     var: alternc_login
+
+- name: Add AlternC repository key
+  apt_key:
+    url: "{{ alternc_repo }}/{{ alternc_key }}"
+    state: present
+
+- name: Add AlternC repository
+  apt_repository:
+    repo: deb {{ alternc_repo }} {{ alternc_branch }}
+    state: present
+    filename: alternc
+  register: alternc_repo_add
+
+- name: Update packages data if needed
+  apt:
+    update_cache: yes
+  when: alternc_repo_add is changed
+
+- name: Install alternc-slavedns package
+  apt:
+    name: alternc-slavedns
+    cache_valid_time: 600
+    state: present
+
+- name: Template AlternC slave DNS configuration file
+  template:
+    src: alternc-slavedns-config.j2
+    dest: '{{ alternc_slavedns_confdir }}/{{ alternc_slavedns_master }}.conf'
+    owner: root
+    group: root
+    mode: '0644'
+  when:  alternc_slavedns_master != ''
+
+...
